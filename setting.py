@@ -4,10 +4,10 @@ import pygame
 class Setting:
     pygame.init()
 
-    width = 1080
-    height = 600
+    height = 1080
+    width = 600
 
-    screen = pygame.display.set_mode((width, height))
+    screen = pygame.display.set_mode((0, 0))
     pygame.display.set_caption("Evol")
     clock = pygame.time.Clock()
     fps = 60

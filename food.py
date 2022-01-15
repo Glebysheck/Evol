@@ -1,6 +1,5 @@
 class Food:
-    radius = 15
-    location_x, location_y = 0, 0
+    radius = 10
 
     def __init__(self, location_x, location_y):
         self.location_x = location_x

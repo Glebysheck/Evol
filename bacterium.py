@@ -1,13 +1,13 @@
 from random import randint
 import pygame
-import vegetables
-from meats import Meat
-from walls import Wall
+import vegetable
+from meat import Meat
+from wall import Wall
 from setting import Setting
 
 
 class Bacterium:
-    width, height = 30, 30
+    width, height = 20, 20
     color = (45, 84, 67)
 
     orientations = [[-1, 1], [0, 1], [1, 1], [1, 0], [1, -1], [0, -1], [-1, -1], [-1, 0]]
@@ -15,10 +15,8 @@ class Bacterium:
 
     foods = 100
     standard_days = 200
-    days = 0
     health = 100
-
-    reaction_to = 0
+    bite_force = 25
 
     bacterium_dict = {}
     new_bacterium_dict = {}
@@ -38,18 +36,20 @@ class Bacterium:
         if self.health < 100:
             self.health += 5
             self.foods -= 5
-        if self.__str__() in vegetables.Vegetable.vegetables_dict:
-            vegetables.Vegetable.vegetables_dict.pop(self.__str__())
-            self.foods += vegetables.Vegetable.nutritional_value
+        if self.__str__() in vegetable.Vegetable.vegetables_dict:
+            vegetable.Vegetable.vegetables_dict.pop(self.__str__())
+            self.foods += vegetable.Vegetable.nutritional_value
         if self.__str__() in Meat.meat_dict:
             Meat.meat_dict.pop(self.__str__())
             self.foods += Meat.nutritional_value
 
-        view = "{}_{}".format(self.location_x + self.orientation[0] * 30, self.location_y + self.orientation[1] * 30)
+        vx = self.location_x + self.orientation[0] * self.width
+        vy = self.location_y + self.orientation[1] * self.height
+        view = "{}_{}".format(vx, vy)
 
         if view in Wall.walls_dict:
             self.reaction("walls")
-        elif view in vegetables.Vegetable.vegetables_dict:
+        elif view in vegetable.Vegetable.vegetables_dict:
             self.reaction("vegetable")
         elif view in self.bacterium_dict:
             if self.bacterium_dict[view].color == self.color:
@@ -88,7 +88,9 @@ class Bacterium:
         for key, value in self.reaction_to.items():
             rea[key] = value.copy()
 
-        bac = Bacterium(self.location_x + self.orientation[0] * 30, self.location_y + self.orientation[1] * 30, rea)
+        bac_x = self.location_x + self.orientation[0] * self.width
+        bac_y = self.location_y + self.orientation[1] * self.height
+        bac = Bacterium(bac_x, bac_y, rea)
         bac.color = self.color
         bac.standard_days = self.standard_days
         bac.orientation = self.orientation
@@ -113,22 +115,29 @@ class Bacterium:
         self.orientation = self.orientations[orient]
 
     def moving_forward(self):
-        self.location_x += self.orientation[0] * 30
-        self.location_y += self.orientation[1] * 30
+        self.location_x += self.orientation[0] * self.width
+        self.location_y += self.orientation[1] * self.height
         self.foods -= 10
 
     def bite(self):
         self.foods -= 10
-        view = "{}_{}".format(self.location_x + self.orientation[0] * 30, self.location_y + self.orientation[1] * 30)
 
-        self.bacterium_dict[view].health -= 25
+        vx = self.location_x + self.orientation[0] * self.width
+        vy = self.location_y + self.orientation[1] * self.height
+        view = "{}_{}".format(vx, vy)
+
+        self.bacterium_dict[view].health -= self.bite_force
 
     def mutation(self):
         if randint(0, 4) == 1:
-            if randint(0, 10) == 1:
+            if randint(0, 25) == 1:
                 self.color = (randint(0, 255), randint(0, 255), randint(0, 255))
             if randint(0, 20) == 1:
-                self.standard_days += randint(-5, 20)
+                self.standard_days += randint(-5, 5)
+            if randint(0, 20) == 1:
+                self.bite_force += randint(-5, 5)
+            if randint(0, 20) == 1:
+                self.health += randint(-5, 5)
             if randint(0, 20) == 1:
                 self.reaction_to["walls"][randint(1, len(self.reaction_to["walls"]) - 1)] = randint(0, 1)
                 if randint(0, 40) == 1:
@@ -143,8 +152,8 @@ class Bacterium:
     @classmethod
     def creating_bacteria(cls):
         for i in range(0, 10):
-            bac_x = randint(0, int(Setting.width / cls.width)) * cls.width
-            bac_y = randint(0, int(Setting.height / cls.height)) * cls.height
+            bac_x = randint(1, int(Setting.height / cls.width) - 2) * cls.width
+            bac_y = randint(1, int(Setting.width / cls.height) - 2) * cls.height
             reac = {"walls": [1, 0, 0, 0], "vegetable": [1, 0, 0, 0], "meat": [1, 0, 0, 0],
                     "bacterium": [1, 0, 0, 0], "like bacterium": [1, 0, 0, 0], "empty cell": [1, 0, 0, 0]}
             bacterium = Bacterium(bac_x, bac_y, reac)
@@ -175,6 +184,6 @@ class Bacterium:
                 i.motion()
                 cls.new_bacterium_dict[str(i)] = i
 
-            pygame.draw.rect(Setting.screen, i.color, (i.location_x, i.location_y, i.width, i.height))
+            pygame.draw.rect(Setting.screen, i.color, (i.location_x, i.location_y, i.height, i.width))
 
         cls.bacterium_dict = cls.new_bacterium_dict

@@ -1,4 +1,4 @@
-from foods import Food
+from food import Food
 
 
 class Meat(Food):

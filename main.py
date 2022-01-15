@@ -1,9 +1,9 @@
 from random import randint
 import pygame
-from bacteriums import Bacterium
-from vegetables import Vegetable
-import meats
-from walls import Wall
+from bacterium import Bacterium
+from vegetable import Vegetable
+from meat import Meat
+from wall import Wall
 from setting import Setting
 
 WHITE = (250, 250, 250)
@@ -35,10 +35,10 @@ while running:
     Setting.screen.fill(WHITE)
 
     for i in Wall.walls_list:
-        pygame.draw.rect(Setting.screen, (0, 0, 0), (i.location_x, i.location_y, i.width, i.height))
+        pygame.draw.rect(Setting.screen, (0, 0, 0), (i.location_x, i.location_y, i.height, i.width))
 
     # Генератор растительности
-    if len(Vegetable.vegetables_dict) <= 300:
+    if len(Vegetable.vegetables_dict) <= 600:
         Vegetable.generation(Bacterium.bacterium_dict, Wall.walls_dict)
 
     # Добавление бактерий при отсутствии их на поле
@@ -49,14 +49,14 @@ while running:
         pygame.draw.circle(Setting.screen, i.color, (i.location_x, i.location_y), i.radius)
 
     rotten = []
-    for i in meats.Meat.meat_dict.values():
+    for i in Meat.meat_dict.values():
         i.rotting()
         if i.nutritional_value <= 0:
             rotten.append(i)
         pygame.draw.circle(Setting.screen, i.color, (i.location_x, i.location_y), i.radius)
 
     for i in rotten:
-        meats.Meat.meat_dict.pop(str(i))
+        Meat.meat_dict.pop(str(i))
 
     Bacterium.step()
 

@@ -1,5 +1,5 @@
 from random import randint
-from foods import Food
+from food import Food
 from setting import Setting
 
 
@@ -11,9 +11,9 @@ class Vegetable(Food):
 
     @classmethod
     def generation(cls, bacterium_dict, walls_dict):
-        for i in range(0, 35):
-            veg_x = randint(0, int(Setting.width / (cls.radius * 2))) * cls.radius * 2 + cls.radius
-            veg_y = randint(0, int(Setting.height / (cls.radius * 2))) * cls.radius * 2 + cls.radius
+        for i in range(0, 15):
+            veg_x = randint(1, int(Setting.height / (cls.radius * 2)) - 2) * cls.radius * 2 + cls.radius
+            veg_y = randint(1, int(Setting.width / (cls.radius * 2)) - 2) * cls.radius * 2 + cls.radius
 
             vegetable = Vegetable(veg_x, veg_y)
 
