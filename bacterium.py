@@ -4,10 +4,10 @@ import vegetable
 from meat import Meat
 from wall import Wall
 from setting import Setting
+from rect import Rect
 
 
-class Bacterium:
-    width, height = 20, 20
+class Bacterium(Rect):
     color = (45, 84, 67)
 
     orientations = [[-1, 1], [0, 1], [1, 1], [1, 0], [1, -1], [0, -1], [-1, -1], [-1, 0]]
@@ -18,12 +18,11 @@ class Bacterium:
     health = 100
     bite_force = 25
 
-    bacterium_dict = {}
+    Rect.square_object["bacterium_dict"] = {}
     new_bacterium_dict = {}
 
     def __init__(self, location_x, location_y, reaction_to):
-        self.location_x = location_x
-        self.location_y = location_y
+        Rect.__init__(self, location_x, location_y)
         self.days = self.standard_days
         self.reaction_to = reaction_to
 
@@ -43,16 +42,16 @@ class Bacterium:
             Meat.meat_dict.pop(self.__str__())
             self.foods += Meat.nutritional_value
 
-        vx = self.location_x + self.orientation[0] * self.width
-        vy = self.location_y + self.orientation[1] * self.height
+        vx = self.location_x + self.orientation[0] * self.size
+        vy = self.location_y + self.orientation[1] * self.size
         view = "{}_{}".format(vx, vy)
 
-        if view in Wall.walls_dict:
+        if view in Rect.square_object["walls_dict"]:
             self.reaction("walls")
         elif view in vegetable.Vegetable.vegetables_dict:
             self.reaction("vegetable")
-        elif view in self.bacterium_dict:
-            if self.bacterium_dict[view].color == self.color:
+        elif view in Rect.square_object["bacterium_dict"]:
+            if Rect.square_object["bacterium_dict"][view].color == self.color:
                 self.reaction("like bacterium")
             else:
                 self.reaction("bacterium")
@@ -88,8 +87,8 @@ class Bacterium:
         for key, value in self.reaction_to.items():
             rea[key] = value.copy()
 
-        bac_x = self.location_x + self.orientation[0] * self.width
-        bac_y = self.location_y + self.orientation[1] * self.height
+        bac_x = self.location_x + self.orientation[0] * self.size
+        bac_y = self.location_y + self.orientation[1] * self.size
         bac = Bacterium(bac_x, bac_y, rea)
         bac.color = self.color
         bac.standard_days = self.standard_days
@@ -115,18 +114,18 @@ class Bacterium:
         self.orientation = self.orientations[orient]
 
     def moving_forward(self):
-        self.location_x += self.orientation[0] * self.width
-        self.location_y += self.orientation[1] * self.height
+        self.location_x += self.orientation[0] * self.size
+        self.location_y += self.orientation[1] * self.size
         self.foods -= 10
 
     def bite(self):
         self.foods -= 10
 
-        vx = self.location_x + self.orientation[0] * self.width
-        vy = self.location_y + self.orientation[1] * self.height
+        vx = self.location_x + self.orientation[0] * self.size
+        vy = self.location_y + self.orientation[1] * self.size
         view = "{}_{}".format(vx, vy)
 
-        self.bacterium_dict[view].health -= self.bite_force
+        Rect.square_object["bacterium_dict"][view].health -= self.bite_force
 
     def mutation(self):
         if randint(0, 4) == 1:
@@ -152,16 +151,16 @@ class Bacterium:
     @classmethod
     def creating_bacteria(cls):
         for i in range(0, 10):
-            bac_x = randint(1, int(Setting.height / cls.width) - 2) * cls.width
-            bac_y = randint(1, int(Setting.width / cls.height) - 2) * cls.height
+            bac_x = randint(1 + Setting.h_indent, int(Setting.height / cls.size) - 2 + Setting.h_indent) * cls.size
+            bac_y = randint(1 + Setting.v_indent, int(Setting.width / cls.size) - 2 + Setting.v_indent) * cls.size
             reac = {"walls": [1, 0, 0, 0], "vegetable": [1, 0, 0, 0], "meat": [1, 0, 0, 0],
                     "bacterium": [1, 0, 0, 0], "like bacterium": [1, 0, 0, 0], "empty cell": [1, 0, 0, 0]}
             bacterium = Bacterium(bac_x, bac_y, reac)
 
-            if str(bacterium) in Wall.walls_dict:
+            if str(bacterium) in Rect.square_object["walls_dict"]:
                 pass
             else:
-                if str(bacterium) in cls.bacterium_dict:
+                if str(bacterium) in Rect.square_object["bacterium_dict"]:
                     pass
                 else:
                     for j in range(0, 30):
@@ -172,7 +171,7 @@ class Bacterium:
     def step(cls):
         cls.new_bacterium_dict = {}
 
-        for i in cls.bacterium_dict.values():
+        for i in Rect.square_object["bacterium_dict"].values():
             if i.health <= 0:
                 meat = Meat(i.location_x + Meat.radius, i.location_y + Meat.radius)
                 Meat.meat_dict[str(meat)] = meat
@@ -184,6 +183,4 @@ class Bacterium:
                 i.motion()
                 cls.new_bacterium_dict[str(i)] = i
 
-            pygame.draw.rect(Setting.screen, i.color, (i.location_x, i.location_y, i.height, i.width))
-
-        cls.bacterium_dict = cls.new_bacterium_dict
+        Rect.square_object["bacterium_dict"] = cls.new_bacterium_dict

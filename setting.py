@@ -2,12 +2,16 @@ import pygame
 
 
 class Setting:
-    pygame.init()
+    h_indent = 18
+    v_indent = 1
 
-    height = 1080
-    width = 600
+    height = 980
+    width = 500
 
     screen = pygame.display.set_mode((0, 0))
     pygame.display.set_caption("Evol")
     clock = pygame.time.Clock()
-    fps = 60
+
+    steps = [1, 1]
+
+    running = True
